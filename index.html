@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AXIS — Especialista Industrial</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090e;
+  --s1: #0d1118;
+  --s2: #141a24;
+  --s3: #1c2333;
+  --border: #1e2a3a;
+  --b2: #263040;
+  --accent: #00d4ff;
+  --accent2: #ff6b00;
+  --ok: #00e676;
+  --warn: #ffab00;
+  --err: #ff3d3d;
+  --text: #e8edf5;
+  --muted: #5a7080;
+  --muted2: #8899aa;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text);display:flex;flex-direction:column}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+}
+.axis-logo{
+  display:flex;align-items:center;gap:8px;
+}
+.axis-icon{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--accent),#0066ff);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  position:relative;
+}
+.axis-icon::after{
+  content:'';position:absolute;
+  bottom:2px;right:2px;
+  width:9px;height:9px;
+  border-radius:50%;
+  border:2px solid var(--s1);
+  background:var(--ok);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.axis-name{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:16px;
+  letter-spacing:0.05em;
+  color:#fff;
+}
+.axis-sub{font-size:11px;color:var(--muted2);margin-top:1px}
+.status-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.signal-badge{
+  display:flex;align-items:center;gap:5px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;padding:3px 8px;
+  border-radius:20px;
+  border:1px solid;
+}
+.signal-badge.online{color:var(--ok);border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.06)}
+.signal-badge.offline{color:var(--warn);border-color:rgba(255,171,0,0.3);background:rgba(255,171,0,0.06)}
+.signal-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── MESSAGES ── */
+.messages{
+  flex:1;overflow-y:auto;
+  padding:16px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+.msg{display:flex;gap:10px;animation:msgIn 0.25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+
+.msg-av{
+  width:30px;height:30px;border-radius:8px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:14px;margin-top:2px;
+}
+.msg-av.bot{background:linear-gradient(135deg,var(--accent),#0066ff)}
+.msg-av.user-av{background:var(--s3);border:1px solid var(--b2);font-size:12px}
+
+.msg-body{max-width:82%}
+.bubble{
+  padding:11px 14px;
+  border-radius:12px;
+  font-size:13.5px;line-height:1.7;
+}
+.bot .bubble{
+  background:var(--s2);
+  border:1px solid var(--border);
+  border-bottom-left-radius:3px;
+}
+.user .bubble{
+  background:rgba(0,212,255,0.08);
+  border:1px solid rgba(0,212,255,0.18);
+  border-bottom-right-radius:3px;
+  text-align:right;
+}
+.bubble strong{color:var(--accent);font-weight:600}
+.bubble code{
+  background:rgba(0,212,255,0.08);
+  padding:1px 5px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;color:var(--accent);
+}
+.bubble .step{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+}
+.bubble .step:last-child{border:none}
+.step-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--accent);
+  background:rgba(0,212,255,0.1);
+  padding:1px 6px;border-radius:3px;
+  flex-shrink:0;margin-top:2px;
+}
+.msg-time{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--muted);
+  margin-top:4px;padding:0 3px;
+}
+.user .msg-time{text-align:right}
+
+/* OPTIONS */
+.options-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-top:10px;
+}
+.opt-btn{
+  background:var(--s3);
+  border:1px solid var(--b2);
+  color:var(--muted2);
+  font-size:12.5px;font-family:'DM Sans',sans-serif;
+  padding:8px 14px;border-radius:20px;
+  cursor:pointer;transition:all 0.2s;
+  text-align:left;
+}
+.opt-btn:hover,.opt-btn:active{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:rgba(0,212,255,0.06);
+}
+
+/* TYPING */
+.typing-wrap{display:flex;gap:10px;align-items:flex-start}
+.typing{
+  display:flex;align-items:center;gap:5px;
+  padding:11px 16px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:12px;border-bottom-left-radius:3px;
+}
+.typing span{
+  width:5px;height:5px;background:var(--accent);
+  border-radius:50%;animation:bounce 1.2s ease infinite;
+}
+.typing span:nth-child(2){animation-delay:0.2s}
+.typing span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+/* OFFLINE BANNER */
+.offline-banner{
+  background:rgba(255,171,0,0.08);
+  border-bottom:1px solid rgba(255,171,0,0.2);
+  padding:8px 16px;
+  font-size:12px;color:var(--warn);
+  display:none;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+}
+.offline-banner.show{display:block}
+
+/* IMAGE PREVIEW */
+.img-preview{
+  max-width:200px;max-height:150px;
+  border-radius:8px;margin-bottom:8px;
+  border:1px solid var(--b2);display:block;
+}
+
+/* ── FOOTER ── */
+.footer{
+  background:var(--s1);
+  border-top:1px solid var(--border);
+  padding:10px 12px;
+  flex-shrink:0;
+}
+.quick-btns{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:8px;scrollbar-width:none;
+}
+.quick-btns::-webkit-scrollbar{display:none}
+.qbtn{
+  flex-shrink:0;background:var(--s2);
+  border:1px solid var(--border);color:var(--muted2);
+  font-size:11.5px;font-family:'DM Sans',sans-serif;
+  padding:6px 12px;border-radius:16px;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.qbtn:hover,.qbtn:active{border-color:var(--accent);color:var(--accent)}
+
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.textarea{
+  flex:1;background:var(--s2);
+  border:1px solid var(--b2);border-radius:10px;
+  padding:10px 14px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;
+  resize:none;min-height:42px;max-height:100px;
+  outline:none;transition:border-color 0.2s;
+  scrollbar-width:none;line-height:1.5;
+}
+.textarea:focus{border-color:var(--accent)}
+.textarea::placeholder{color:var(--muted)}
+.textarea::-webkit-scrollbar{display:none}
+
+.action-btns{display:flex;gap:6px;flex-shrink:0}
+.act-btn{
+  width:42px;height:42px;border-radius:10px;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;transition:all 0.2s;
+}
+.btn-send{background:linear-gradient(135deg,var(--accent),#0066ff);color:#000}
+.btn-send:hover{transform:scale(1.05);box-shadow:0 3px 12px rgba(0,212,255,0.3)}
+.btn-mic{background:var(--s3);border:1px solid var(--b2);color:var(--muted2)}
+.btn-mic:hover,.btn-mic:active{border-color:var(--accent);color:var(--accent)}
+.btn-mic.recording{background:rgba(255,61,61,0.15);border-color:var(--err);color:var(--err);animation:recPulse 1s ease infinite}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.btn-img{background:var(--s3);border:1px solid var(--b2);color:var(--muted2)}
+.btn-img:hover,.btn-img:active{border-color:var(--accent2);color:var(--accent2)}
+
+.btn-present{background:var(--s3);border:1px solid var(--b2);color:var(--muted2);width:34px;height:34px;font-size:15px}
+.btn-present:hover,.btn-present:active{border-color:var(--accent);color:var(--accent)}
+.btn-voice-toggle{background:var(--s3);border:1px solid var(--b2);color:var(--ok);width:34px;height:34px;font-size:15px;transition:all 0.2s}
+.btn-voice-toggle.muted{color:var(--muted);border-color:var(--border)}
+.btn-voice-toggle:hover{border-color:var(--ok)}
+
+/* REPORT */
+.report-card{
+  background:var(--s2);border:1px solid var(--ok);
+  border-radius:10px;padding:14px;margin-top:8px;
+}
+.report-title{
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:13px;color:var(--ok);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.report-row{font-size:12.5px;color:var(--muted2);padding:4px 0;line-height:1.6}
+.report-row strong{color:var(--text);font-weight:500}
+.copy-btn{
+  margin-top:10px;width:100%;
+  background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);
+  color:var(--ok);font-size:12px;font-family:'DM Sans',sans-serif;
+  padding:8px;border-radius:7px;cursor:pointer;transition:all 0.2s;
+}
+.copy-btn:hover{background:rgba(0,230,118,0.15)}
+
+/* ── LOGIN SCREEN ── */
+.login-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px 24px;
+}
+.login-overlay.hidden{display:none}
+.login-logo{
+  width:72px;height:72px;
+  background:linear-gradient(135deg,var(--accent),#0066ff);
+  border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin-bottom:20px;
+  box-shadow:0 8px 32px rgba(0,212,255,0.25);
+}
+.login-title{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:28px;color:#fff;letter-spacing:0.05em;
+  margin-bottom:6px;
+}
+.login-sub{font-size:13px;color:var(--muted2);margin-bottom:32px;text-align:center;line-height:1.6}
+.login-box{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:14px;padding:24px;width:100%;max-width:380px;
+}
+.login-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.15em;
+  color:var(--accent);text-transform:uppercase;
+  margin-bottom:8px;display:block;
+}
+.login-input{
+  width:100%;background:var(--s3);
+  border:1px solid var(--b2);border-radius:8px;
+  padding:12px 14px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  outline:none;transition:border-color 0.2s;
+  margin-bottom:16px;
+}
+.login-input:focus{border-color:var(--accent)}
+.login-input::placeholder{color:var(--muted);font-size:11px}
+.login-btn{
+  width:100%;
+  background:linear-gradient(135deg,var(--accent),#0066ff);
+  border:none;border-radius:8px;
+  padding:13px;color:#000;
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:14px;cursor:pointer;transition:all 0.2s;
+}
+.login-btn:active{transform:scale(0.98)}
+.login-err{font-size:12px;color:var(--err);margin-top:10px;text-align:center;display:none}
+.login-hint{font-size:11px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6}
+.login-hint a{color:var(--accent);text-decoration:none}
+.login-change{
+  font-size:11px;color:var(--muted);cursor:pointer;
+  text-decoration:underline;margin-left:6px;
+}
+.login-change:hover{color:var(--muted2)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-logo">⚡</div>
+  <div class="login-title">AXIS</div>
+  <div class="login-sub">Especialista Industrial<br>Configure suas chaves de acesso para começar</div>
+  <div class="login-box">
+    <label class="login-label">Chave API Anthropic (IA)</label>
+    <input class="login-input" id="keyInput" type="password"
+      placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off">
+
+    <label class="login-label">Chave API ElevenLabs (Voz)</label>
+    <input class="login-input" id="elKeyInput" type="password"
+      placeholder="sk_... (opcional)" autocomplete="off" autocorrect="off"
+      onkeydown="if(event.key==='Enter')saveKey()">
+
+    <button class="login-btn" onclick="saveKey()">⚡ Entrar no AXIS</button>
+    <div class="login-err" id="loginErr">Chave Anthropic inválida — deve começar com sk-ant-</div>
+    <div class="login-hint">
+      Suas chaves ficam salvas <strong>só neste celular</strong>.<br>
+      Nunca são enviadas para nenhum servidor.<br><br>
+      🔑 <a href="https://console.anthropic.com/settings/keys" target="_blank">Pegar chave Anthropic</a>
+      &nbsp;·&nbsp;
+      🎙️ <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank">Pegar chave ElevenLabs</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="axis-logo">
+    <div class="axis-icon">⚡</div>
+    <div>
+      <div class="axis-name">AXIS</div>
+      <div class="axis-sub">Especialista Industrial</div>
+    </div>
+  </div>
+  <div class="status-right">
+    <button class="act-btn btn-present" id="presentBtn" onclick="apresentar()" title="Quem sou eu">ℹ️</button>
+    <button class="act-btn btn-voice-toggle" id="voiceToggle" onclick="toggleVoice()" title="Voz ligada/desligada">🔊</button>
+    <span class="login-change" onclick="changeKey()" title="Trocar chave API">🔑</span>
+    <div class="signal-badge online" id="signalBadge">
+      <div class="signal-dot"></div>
+      <span id="signalText">ONLINE</span>
+    </div>
+  </div>
+</div>
+
+<!-- OFFLINE BANNER -->
+<div class="offline-banner" id="offlineBanner">
+  ⚡ Modo offline ativo — usando base local de conhecimento
+</div>
+
+<!-- MESSAGES -->
+<div class="messages" id="messages">
+  <div class="msg bot">
+    <div class="msg-av bot">⚡</div>
+    <div class="msg-body">
+      <div class="bubble">
+        <strong>AXIS online.</strong> Qual equipamento e qual sintoma?
+      </div>
+      <div class="msg-time" id="initTime"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="quick-btns">
+    <button class="qbtn" onclick="quick('PowerFlex com falha na IHM')">⚡ PF com falha</button>
+    <button class="qbtn" onclick="quick('WEG CFW com código de erro')">🔴 WEG erro</button>
+    <button class="qbtn" onclick="quick('Profibus DP sem comunicação')">🌐 Profibus DP</button>
+    <button class="qbtn" onclick="quick('Profibus PA dispositivo offline')">🔵 Profibus PA</button>
+    <button class="qbtn" onclick="quick('EtherNet/IP drive não conecta')">🟡 EtherNet/IP</button>
+    <button class="qbtn" onclick="quick('Soft-starter WEG SSW com falha')">🔧 SSW falha</button>
+    <button class="qbtn" onclick="quick('Teste a frio no inversor')">🧊 Teste frio</button>
+    <button class="qbtn" onclick="quick('Troca de placa do inversor')">🔩 Troca placa</button>
+    <button class="qbtn" onclick="quick('Gerar relatório do atendimento')">📋 Relatório</button>
+  </div>
+  <div class="input-row">
+    <textarea class="textarea" id="input" placeholder="Descreva o problema..." rows="1"
+      onkeydown="keyHandler(event)" oninput="resize(this)"></textarea>
+    <div class="action-btns">
+      <button class="act-btn btn-mic" id="micBtn" onclick="toggleMic()" title="Falar">🎤</button>
+      <button class="act-btn btn-img" onclick="document.getElementById('fileInput').click()" title="Foto">📷</button>
+      <button class="act-btn btn-send" onclick="send()" title="Enviar">➤</button>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this)">
+  <input type="file" id="camInput" accept="image/*" capture="environment" onchange="handleFile(this)">
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const MODEL = 'claude-sonnet-4-20250514';
+let API_KEY  = localStorage.getItem('axis_key') || '';
+
+// ══════════════════════════════════════════
+// LOGIN / KEY MANAGEMENT
+// ══════════════════════════════════════════
+function checkLogin() {
+  if (!API_KEY) {
+    document.getElementById('loginOverlay').classList.remove('hidden');
+  } else {
+    document.getElementById('loginOverlay').classList.add('hidden');
+  }
+}
+
+function saveKey() {
+  const val = document.getElementById('keyInput').value.trim();
+  const elVal = document.getElementById('elKeyInput').value.trim();
+  const err = document.getElementById('loginErr');
+  if (!val.startsWith('sk-ant-')) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  API_KEY = val;
+  localStorage.setItem('axis_key', val);
+  // ElevenLabs — opcional
+  if (elVal.startsWith('sk_')) {
+    EL_KEY = elVal;
+    localStorage.setItem('axis_el_key', elVal);
+  }
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('keyInput').value = '';
+  document.getElementById('elKeyInput').value = '';
+  setTimeout(() => speak('AXIS online. Qual equipamento e qual sintoma?'), 500);
+}
+
+function changeKey() {
+  document.getElementById('keyInput').value = '';
+  document.getElementById('elKeyInput').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('loginOverlay').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════
+// KNOWLEDGE BASE OFFLINE
+// Base de conhecimento local — funciona sem internet
+// ══════════════════════════════════════════
+const KB = {
+  // PowerFlex 525
+  'f003': {eq:'PowerFlex 525', title:'F003 – Power Loss / Falta de Fase', steps:['Verificar tensão nas entradas L1, L2, L3 com multímetro escala 600V AC','Verificar fusíveis de entrada do quadro','Verificar se há subtensão ou variação na rede elétrica','Reduzir a carga se a rede estiver instável']},
+  'f004': {eq:'PowerFlex 525', title:'F004 – UnderVoltage', steps:['Medir tensão AC nas entradas L1/L2/L3 → deve ser ±10% da tensão nominal','Verificar fusíveis e bornes de entrada','Verificar disjuntor de proteção','Verificar estabilidade da rede elétrica']},
+  'f005': {eq:'PowerFlex 525', title:'F005 – OverVoltage / Sobretensão DC Bus', steps:['Motor freando muito rápido — aumentar tempo de desaceleração P042','Se carga inercial alta → instalar resistor de frenagem dinâmica','Verificar tensão de entrada (alta tensão na rede)']},
+  'f007': {eq:'PowerFlex 525', title:'F007 – OverCurrent / Sobrecorrente', steps:['Verificar se o eixo do motor ou a carga está travada mecanicamente','Verificar dimensionamento do motor e do inversor','Aumentar tempo de aceleração P041','Verificar cabos de motor (curto entre fases ou para terra)']},
+  'f029': {eq:'PowerFlex 525', title:'F029 – Analog Loss / Perda de Sinal 4-20mA', steps:['Verificar fiação nos terminais AI (Analog Input)','Medir sinal na entrada: deve estar entre 4mA e 20mA','Verificar parâmetro t094 [Anlg In V Loss] ou t097 [Anlg In mA Loss]','Verificar se o transmissor de sinal está ativo']},
+  'f048': {eq:'PowerFlex 525', title:'F048 – Params Defaulted / Parâmetros Apagados', steps:['Parâmetros foram resetados para fábrica','Limpar falha ou ciclar alimentação','Reprogramar todos os parâmetros do motor e da aplicação','Usar CCW para carregar backup se disponível']},
+  'f059': {eq:'PowerFlex 525', title:'F059 – Safety Open / Entradas de Safety Abertas', steps:['Verificar terminais S1, S2 e S+ na régua de bornes do drive','Se não usa função Safety → instalar jumper entre S1-S2 e S+','Verificar relé de segurança da máquina se aplicável']},
+  'f073': {eq:'PowerFlex 525', title:'F073 – EtherNet/IP Loss', steps:['Verificar cabo Ethernet conectado ao drive','Verificar parâmetro P036 (EtherNet/IP Enable) — deve estar habilitado','Verificar IP do drive (P043/P044)','Após alterar parâmetros de rede → ciclar alimentação obrigatório','Verificar se PLC está em RUN e o programa está ativo']},
+  // PowerFlex 755
+  'f037': {eq:'PowerFlex 755', title:'F037 – Net I/O Timeout', steps:['Verificar cabo Ethernet Cat5e ou superior','Verificar switch de rede — se não gerenciável com múltiplos drives → risco de problema','Verificar se laptop conectado na rede esgotou conexões CIP','Aumentar parâmetro Net Idle Timeout (padrão 60s) se problema intermitente','Verificar AOP (Add-On Profile) no Studio 5000 — atualizar se desatualizado']},
+  'f078': {eq:'PowerFlex 755', title:'F078 – IGBT Overtemperature', steps:['Verificar se o ventilador interno está girando','Limpar filtros e heatsink de poeira','Verificar temperatura ambiente do painel (máx 40°C)','Verificar se ciclo de trabalho (duty cycle) não está excedendo rating do drive','Verificar parâmetro Fan Speed no grupo Predictive Maintenance']},
+  'f316': {eq:'PowerFlex 755', title:'F316 – Node Fault / Load Loss', steps:['Verificar cabo Ethernet físico — conector RJ45 travado','Rastrear o caminho de rede: drive → switch → controlador','Verificar se o switch tem IGMP Snooping habilitado','Verificar firmware do drive vs versão do AOP no Studio 5000']},
+  // WEG CFW
+  'f006': {eq:'WEG CFW11/CFW700', title:'F006 – Desequilíbrio / Falta de Fase', steps:['Medir tensão entre fases R/S/T com multímetro 600V AC','Desequilíbrio máximo permitido: 3% entre fases','Verificar fusíveis de entrada','Verificar contatos do contator de linha']},
+  'f021weg': {eq:'WEG CFW', title:'F021 – Subtensão DC Link', steps:['Verificar tensão de alimentação na entrada','Verificar se a rede está com queda de tensão','Verificar fusíveis NH de entrada','Verificar se parâmetro P0296 (tensão de alimentação) está correto']},
+  'f022weg': {eq:'WEG CFW', title:'F022 – Sobretensão DC Link', steps:['Motor freando rápido com carga inercial → aumentar rampa de desaceleração','Verificar se há tensão alta na rede elétrica','Instalar resistor de frenagem se problema persistir']},
+  'f074weg': {eq:'WEG CFW', title:'F074 – Falta Terra / Ground Fault', steps:['Verificar cabo de motor — pode haver curto para terra','Verificar motor com megôhmetro (desconectar do inversor primeiro)','Se cabo longo >100m → alta capacitância parasita → reduzir frequência de chaveamento P0297','Verificar aterramento do motor e do inversor']},
+  'f051weg': {eq:'WEG CFW', title:'F051/A050 – Sobretemperatura IGBT', steps:['Verificar ventilador do inversor — deve estar girando','Limpar dissipador de calor de poeira e sujeira','Verificar temperatura ambiente (máx 50°C)','Verificar se inversor está subdimensionado para a carga']},
+  // Profibus DP
+  'profibus_dp_down': {eq:'Profibus DP', title:'Barramento DP sem comunicação — todos os escravos', steps:['PASSO 1 — Medir resistência entre Pin3(B+) e Pin8(A-) no conector DB9 com TODOS os dispositivos DESLIGADOS → deve ser ≈110Ω','PASSO 2 — Verificar terminações: exatamente 2 terminadores ativos por segmento (início e fim)','PASSO 3 — Verificar se fios A e B estão invertidos em algum conector → inverte o barramento inteiro','PASSO 4 — Verificar cabo (não usar cabo telefônico — usar cabo Profibus roxo AWG22)','PASSO 5 — Conectar ProfiTrace ou TS Analisador PRO para ver forma de onda e erros']},
+  'profibus_dp_intermit': {eq:'Profibus DP', title:'Erros intermitentes Profibus DP', steps:['Verificar terminações dependentes de alimentação — se dispositivo no fim do segmento desliga → terminação some → usar caixa de terminação passiva independente','Verificar conectores DB9 com vibração — conector pode ter mau contato interno (fio rompido mas com contato mínimo)','Verificar aterramento da blindagem — continuar de um ponto somente','Com ProfiTrace: procurar Retry/Framing Error/Parity Error por dispositivo — exibidos em vermelho']},
+  // Profibus PA
+  'profibus_pa_offline': {eq:'Profibus PA', title:'Dispositivo PA offline', steps:['PASSO 1 — Medir tensão no segmento PA: deve estar entre 13,5V e 32V','PASSO 2 — Verificar polaridade (+) e (-) no instrumento — polaridade invertida = sem comunicação','PASSO 3 — Medir corrente do instrumento: consumo típico 10-15mA','PASSO 4 — Verificar stub line (ramal): máximo 120m por instrumento','PASSO 5 — Usar DM-AM ou VPW10 para medir nível de sinal, jitter e ruído do nó']},
+  'profibus_pa_voltage': {eq:'Profibus PA', title:'Tensão baixa no segmento PA', steps:['Calcular: Tensão no coupler - (Corrente total × Resistência do cabo × Comprimento)','Resistência do cabo PA: ≈44Ω/km','Tensão mínima no instrumento mais distante: 9V','Se tensão baixa: reduzir número de instrumentos no segmento ou adicionar fonte de alimentação']},
+  // Teste a frio
+  'teste_frio': {eq:'Inversor', title:'Teste a frio — verificação de módulo de potência', steps:['SEGURANÇA: LOTO + aguardar 5min AB / 10min WEG para descarga dos capacitores','Medir tensão DC Bus → deve estar abaixo de 50V antes de tocar','INSTRUMENTO: multímetro na função DIODE CHECK (símbolo de diodo)','Desconectar cabos de motor (U/V/W) e cabos de entrada (L1/L2/L3)','LADO CONVERSOR — Ponteira (+) em DC+ → (-) em L1, L2, L3: deve mostrar queda de diodo 0,3–0,7V','LADO INVERSOR — Ponteira (+) em DC+ → (-) em U, V, W: mesma leitura esperada','Se medir 0 ou muito baixo → IGBT/diodo em curto → módulo de potência danificado','Se medir OL em polaridade direta → diodo aberto → módulo danificado']},
+};
+
+// ══════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════
+let isOnline = navigator.onLine;
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let pendingImage = null;
+let pendingImageB64 = null;
+let sessionLog = {equipment:'', symptom:'', actions:[], resolved:false};
+let history = [];
+
+const SYSTEM_PROMPT = `Você é o AXIS — especialista sênior em automação industrial com 20+ anos de campo.
+
+EQUIPAMENTOS DOMINADOS:
+- Inversores PowerFlex: PF4, PF40, PF400, PF525, PF753, PF755
+- Inversores WEG: CFW300, CFW500, CFW700, CFW11
+- Soft-starters WEG: SSW05, SSW06, SSW07
+- Redes Profibus DP e PA (Pepperl+Fuchs, Siemens)
+- EtherNet/IP com Allen-Bradley (ControlLogix, CompactLogix)
+- Ferramentas: CCW, DriveExecutive, PACTware, ProfiTrace, DM-AM, VPW10 (Vivace)
+
+REGRAS ABSOLUTAS:
+1. UMA instrução por vez — técnico executa, confirma, avança
+2. Quando diagnosticar: apresente 2-4 hipóteses numeradas para o técnico escolher
+3. Navegação pela IHM: informe o caminho EXATO (Menu → Submenu → Parâmetro → Valor esperado)
+4. Medições físicas: especifique terminais exatos, escala do multímetro, valor esperado e o que significa se estiver fora
+5. Após cada instrução pergunte: "✅ Feito. O que apareceu?" ou "📟 Qual valor mediu?"
+6. NUNCA invente parâmetros ou códigos de falha que não conhece
+7. NUNCA explique teoria sem ser solicitado
+8. Se urgente (parado/produção): vai direto para hipótese mais provável sem menu
+
+ANÁLISE DE IMAGEM: Identifique equipamento (marca, modelo), leia código de falha visível, descreva o problema e inicie diagnóstico diretamente.
+
+RELATÓRIO: Ao resolver, gere automaticamente no formato:
+📋 RELATÓRIO | Equipamento | Sintoma | Causa raiz | Ações executadas | Resultado
+
+IDIOMA: Português brasileiro, linguagem técnica de campo, direto e objetivo.`;
+
+// ══════════════════════════════════════════
+// OFFLINE KNOWLEDGE LOOKUP
+// ══════════════════════════════════════════
+function lookupOffline(text) {
+  const t = text.toLowerCase();
+  // PowerFlex fault codes
+  const pfMatch = t.match(/f(\d{3})/);
+  if (pfMatch) {
+    const code = 'f' + pfMatch[1];
+    if (KB[code]) return formatKB(KB[code]);
+  }
+  // WEG fault codes
+  if ((t.includes('weg') || t.includes('cfw') || t.includes('ssw')) && t.match(/f\d+/)) {
+    const wMatch = t.match(/f(\d+)/);
+    if (wMatch) {
+      const wCode = 'f' + wMatch[1] + 'weg';
+      if (KB[wCode]) return formatKB(KB[wCode]);
+    }
+  }
+  // Keywords
+  if (t.includes('profibus') && t.includes('pa') && (t.includes('offline') || t.includes('sem comunicação')))
+    return formatKB(KB['profibus_pa_offline']);
+  if (t.includes('profibus') && t.includes('pa') && (t.includes('tensão') || t.includes('voltage')))
+    return formatKB(KB['profibus_pa_voltage']);
+  if (t.includes('profibus') && (t.includes('intermit') || t.includes('instável') || t.includes('erro')))
+    return formatKB(KB['profibus_dp_intermit']);
+  if (t.includes('profibus') && (t.includes('sem comuni') || t.includes('down') || t.includes('barramento')))
+    return formatKB(KB['profibus_dp_down']);
+  if (t.includes('teste') && (t.includes('frio') || t.includes('diodo') || t.includes('igbt')))
+    return formatKB(KB['teste_frio']);
+  if (t.includes('f006') || (t.includes('falta') && t.includes('fase') && t.includes('weg')))
+    return formatKB(KB['f006']);
+  if (t.includes('f074') || (t.includes('falta terra') && t.includes('weg')))
+    return formatKB(KB['f074weg']);
+  return null;
+}
+
+function formatKB(item) {
+  let html = `<strong>${item.title}</strong><br><br>`;
+  item.steps.forEach((s, i) => {
+    html += `<div class="step"><span class="step-num">0${i+1}</span><span>${s}</span></div>`;
+  });
+  html += `<br><small style="color:var(--warn)">⚡ Modo offline — base local</small>`;
+  return html;
+}
+
+// ══════════════════════════════════════════
+// ONLINE — CLAUDE API
+// ══════════════════════════════════════════
+async function callClaude(userText, imageB64 = null) {
+  const content = [];
+  if (imageB64) {
+    content.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data:imageB64}});
+  }
+  content.push({type:'text', text: userText});
+  history.push({role:'user', content});
+
+  // Track session
+  if (!sessionLog.symptom && userText.length > 5) sessionLog.symptom = userText;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: history
+    })
+  });
+  if (!resp.ok) throw new Error('API error ' + resp.status);
+  const data = await resp.json();
+  const text = data.content.map(c => c.text || '').join('\n').trim();
+  history.push({role:'assistant', content:[{type:'text', text}]});
+
+  // Track actions
+  sessionLog.actions.push(userText.substring(0, 80));
+  if (text.toLowerCase().includes('normalizado') || text.toLowerCase().includes('resolvido') || text.toLowerCase().includes('problema resolvido')) {
+    sessionLog.resolved = true;
+  }
+  return text;
+}
+
+// ══════════════════════════════════════════
+// MAIN SEND
+// ══════════════════════════════════════════
+async function send() {
+  const input = document.getElementById('input');
+  const text = (input.value || '').trim();
+  if (!text && !pendingImage) return;
+
+  const displayText = pendingImage ? `[📷 Imagem] ${text || 'Identificar equipamento'}` : text;
+  addMsg('user', displayText);
+  input.value = ''; input.style.height = 'auto';
+
+  const img = pendingImageB64;
+  pendingImage = null; pendingImageB64 = null;
+
+  showTyping();
+
+  try {
+    let response;
+    if (!isOnline) {
+      // Try offline KB
+      const offline = lookupOffline(text);
+      if (offline) {
+        response = offline;
+      } else {
+        response = `<strong>⚠️ Sem conexão</strong><br><br>Não encontrei esse problema na base local.<br><br>Quando voltar o sinal a IA responde. Enquanto isso, me diga:<br><br>1️⃣ Qual o código exato na IHM?<br>2️⃣ Qual a marca e modelo do equipamento?`;
+      }
+      hideTyping();
+      addMsg('bot', response);
+    } else {
+      try {
+        const aiResp = await callClaude(text || 'Analise esta imagem de equipamento industrial', img);
+        hideTyping();
+        addMsg('bot', formatAI(aiResp));
+
+        // Auto-generate report if resolved
+        if (sessionLog.resolved) {
+          setTimeout(() => addReport(), 800);
+        }
+      } catch(e) {
+        hideTyping();
+        // Fallback to offline
+        const offline = lookupOffline(text);
+        if (offline) {
+          addMsg('bot', offline + '<br><small style="color:var(--err)">⚠️ Falha na IA — usando base local</small>');
+        } else {
+          addMsg('bot', `<strong>⚠️ Falha de conexão</strong><br>Verifique sua internet. Usando base offline para consultas básicas.`);
+        }
+      }
+    }
+  } catch(e) {
+    hideTyping();
+    addMsg('bot', '⚠️ Erro interno. Tente novamente.');
+  }
+}
+
+function formatAI(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+// ══════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════
+function getTime() {
+  return new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+
+function addMsg(role, html, opts = {}) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+
+  const isBot = role === 'bot';
+  let imgHtml = '';
+  if (opts.imgSrc) imgHtml = `<img class="img-preview" src="${opts.imgSrc}">`;
+
+  let optionsHtml = '';
+  if (opts.options) {
+    optionsHtml = '<div class="options-row">' + 
+      opts.options.map((o, i) => `<button class="opt-btn" onclick="selectOpt('${o.replace(/'/g,"\\'")}', this)">${i+1}️⃣ ${o}</button>`).join('') +
+      '</div>';
+  }
+
+  div.innerHTML = `
+    <div class="msg-av ${isBot ? 'bot' : 'user-av'}">${isBot ? '⚡' : '👤'}</div>
+    <div class="msg-body">
+      ${imgHtml}
+      <div class="bubble">${html}</div>
+      ${optionsHtml}
+      <div class="msg-time">${getTime()}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  // Fala respostas do bot
+  if (isBot && !opts.silent) {
+    setTimeout(() => {
+      const plain = html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().substring(0,400);
+      speak(plain);
+    }, 100);
+  }
+}
+
+function selectOpt(text, btn) {
+  btn.closest('.options-row').querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  document.getElementById('input').value = text;
+  send();
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const t = document.createElement('div');
+  t.className = 'msg bot'; t.id = 'typing';
+  t.innerHTML = `<div class="msg-av bot">⚡</div><div class="msg-body"><div class="typing-wrap"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+  msgs.appendChild(t);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+function addReport() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  const report = `
+    <div class="report-card">
+      <div class="report-title">📋 RELATÓRIO DE ATENDIMENTO</div>
+      <div class="report-row"><strong>Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}</div>
+      <div class="report-row"><strong>Equipamento:</strong> ${sessionLog.equipment || 'Não informado'}</div>
+      <div class="report-row"><strong>Sintoma inicial:</strong> ${sessionLog.symptom || '—'}</div>
+      <div class="report-row"><strong>Ações:</strong> ${sessionLog.actions.slice(0,5).join(' → ') || '—'}</div>
+      <div class="report-row"><strong>Resultado:</strong> ${sessionLog.resolved ? '✅ Normalizado' : '⚠️ Em andamento'}</div>
+      <button class="copy-btn" onclick="copyReport(this)">📋 Copiar para WhatsApp</button>
+    </div>`;
+  div.innerHTML = `<div class="msg-av bot">⚡</div><div class="msg-body"><div class="bubble">${report}</div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function copyReport(btn) {
+  const text = `📋 RELATÓRIO AXIS\n` +
+    `Data: ${new Date().toLocaleString('pt-BR')}\n` +
+    `Equipamento: ${sessionLog.equipment || 'N/I'}\n` +
+    `Sintoma: ${sessionLog.symptom || '—'}\n` +
+    `Ações: ${sessionLog.actions.slice(0,3).join(' → ')}\n` +
+    `Resultado: ${sessionLog.resolved ? '✅ Normalizado' : '⚠️ Em andamento'}`;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => btn.textContent = '📋 Copiar para WhatsApp', 2000);
+  });
+}
+
+// ══════════════════════════════════════════
+// QUICK BUTTONS
+// ══════════════════════════════════════════
+function quick(text) {
+  document.getElementById('input').value = text;
+  send();
+}
+
+// ══════════════════════════════════════════
+// KEYBOARD / RESIZE
+// ══════════════════════════════════════════
+function keyHandler(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ══════════════════════════════════════════
+// IMAGE HANDLING
+// ══════════════════════════════════════════
+function handleFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const src = e.target.result;
+    pendingImageB64 = src.split(',')[1];
+    pendingImage = src;
+    // Preview in input area
+    document.getElementById('input').value = 'Identificar e diagnosticar este equipamento';
+    addMsg('user', '📷 Imagem carregada — enviando para análise...', {imgSrc: src});
+    send();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+// ══════════════════════════════════════════
+// VOICE (SPEECH TO TEXT)
+// ══════════════════════════════════════════
+function toggleMic() {
+  if (isRecording) stopMic();
+  else startMic();
+}
+
+function startMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    addMsg('bot', '⚠️ Reconhecimento de voz não suportado neste navegador. Use Chrome no Android.');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'pt-BR';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micBtn').textContent = '🔴';
+  };
+  rec.onresult = e => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('input').value = text;
+    stopMic();
+    setTimeout(() => send(), 300);
+  };
+  rec.onerror = () => stopMic();
+  rec.onend = () => stopMic();
+  rec.start();
+  window._rec = rec;
+}
+
+function stopMic() {
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').textContent = '🎤';
+  if (window._rec) { try { window._rec.stop(); } catch(e){} }
+}
+
+// ══════════════════════════════════════════
+// VOZ — ELEVENLABS TEXT TO SPEECH
+// ══════════════════════════════════════════
+let voiceEnabled = true;
+let speaking = false;
+let currentAudio = null;
+
+// Chave e voz ElevenLabs — carregada do localStorage
+let EL_KEY   = localStorage.getItem('axis_el_key') || '';
+const EL_VOICE = 'pNInz6obpgDQGcFmaJgB'; // Adam — voz masculina natural PT-BR
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  const btn = document.getElementById('voiceToggle');
+  if (voiceEnabled) {
+    btn.textContent = '🔊';
+    btn.classList.remove('muted');
+    btn.title = 'Voz ligada — clique para silenciar';
+  } else {
+    btn.textContent = '🔇';
+    btn.classList.add('muted');
+    btn.title = 'Voz desligada — clique para ligar';
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  }
+}
+
+async function speak(text) {
+  if (!voiceEnabled) return;
+  // Para áudio atual se houver
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  // Limpa tags e emojis
+  const clean = text
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[^\p{L}\p{N}\s.,!?;:()]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 350);
+  if (!clean || clean.length < 3) return;
+  try {
+    const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}/stream`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': EL_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: clean,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.3,
+          use_speaker_boost: true
+        }
+      })
+    });
+    if (!resp.ok) {
+      // Fallback para voz nativa se ElevenLabs falhar
+      speakNative(clean);
+      return;
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.onended = () => { speaking = false; URL.revokeObjectURL(url); };
+    speaking = true;
+    currentAudio.play();
+  } catch(e) {
+    // Fallback para voz nativa
+    speakNative(clean);
+  }
+}
+
+function speakNative(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'pt-BR'; utt.rate = 1.0; utt.pitch = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const ptBR = voices.find(v => v.lang === 'pt-BR') || voices.find(v => v.lang.startsWith('pt'));
+  if (ptBR) utt.voice = ptBR;
+  window.speechSynthesis.speak(utt);
+}
+
+// ══════════════════════════════════════════
+// APRESENTAÇÃO DO AXIS
+// ══════════════════════════════════════════
+function apresentar() {
+  const texto = `Olá! Eu sou o AXIS — Agente de Diagnóstico Industrial Sênior.
+
+Fui criado para ser o especialista técnico da sua equipe de campo, disponível 24 horas, em qualquer lugar, mesmo sem sinal de internet.
+
+O que eu sei fazer:
+
+Inversores Allen-Bradley: diagnostico todos os PowerFlex — 4, 40, 400, 525, 753 e 755. Conheço cada código de falha, cada parâmetro crítico e o caminho exato na IHM para resolver.
+
+Inversores WEG: domino as linhas CFW 300, 500, 700 e 11, além dos soft-starters SSW 5, 6 e 7. Sei quando é problema de rede elétrica, quando é placa, quando é mecânico.
+
+Redes Profibus: conheço Profibus DP e PA de ponta a ponta — terminações, endereços, corrente de segmento, diagnóstico com ProfiTrace, DM-AM e VPW10 da Vivace.
+
+EtherNet IP: sei configurar drives Allen-Bradley na rede, diagnosticar perda de conexão CIP e trabalhar com Studio 5000 e Connected Components Workbench.
+
+Manutenção: guio você no teste a frio de inversores, na troca de placas PowerFlex e WEG, no backup e restauração de parâmetros.
+
+Meu modo de trabalho: você me conta o sintoma ou manda uma foto — eu apresento as hipóteses mais prováveis para você escolher. Depois, te guio passo a passo pela IHM ou pelas medições, uma instrução por vez, até resolver.
+
+Quando tem internet, uso inteligência artificial avançada. Quando não tem sinal, uso minha base de conhecimento local — nunca paro de funcionar.
+
+Como posso ajudar agora?`;
+
+  // Mostra na tela
+  addMsg('bot', `
+    <strong style="font-size:15px;display:block;margin-bottom:12px">⚡ Olá! Eu sou o AXIS</strong>
+    <div style="line-height:1.9;color:var(--muted2)">
+      Agente de Diagnóstico Industrial Sênior — criado para ser o especialista técnico da sua equipe em campo.<br><br>
+      <strong>O que eu sei fazer:</strong><br><br>
+      ⚡ <strong>Inversores Allen-Bradley</strong> — PowerFlex 4, 40, 400, 525, 753, 755. Todos os códigos de falha, parâmetros e caminhos exatos na IHM.<br><br>
+      🔴 <strong>Inversores & Soft-starters WEG</strong> — CFW300, CFW500, CFW700, CFW11, SSW05, SSW06, SSW07. Diagnóstico de falha elétrica, mecânica e de rede.<br><br>
+      🌐 <strong>Profibus DP e PA</strong> — terminações, corrente de segmento, diagnóstico com ProfiTrace, DM-AM e VPW10 Vivace.<br><br>
+      🟡 <strong>EtherNet/IP Allen-Bradley</strong> — configuração de IP, diagnóstico CIP, Studio 5000, CCW.<br><br>
+      🔩 <strong>Manutenção</strong> — teste a frio de inversores, troca de placas, backup e restauração de parâmetros.<br><br>
+      <strong>Como trabalho:</strong> você descreve o sintoma ou manda uma foto → apresento as hipóteses → guio passo a passo, uma instrução por vez, até resolver.<br><br>
+      <strong>Offline ou online</strong> — nunca paro. 
+    </div>
+  `);
+
+  // Fala a apresentação
+  speak(texto);
+}
+
+// ══════════════════════════════════════════
+// CONNECTIVITY DETECTION
+// ══════════════════════════════════════════
+function updateSignal(online) {
+  isOnline = online;
+  const badge = document.getElementById('signalBadge');
+  const text = document.getElementById('signalText');
+  const banner = document.getElementById('offlineBanner');
+  if (online) {
+    badge.className = 'signal-badge online';
+    text.textContent = 'ONLINE';
+    banner.classList.remove('show');
+  } else {
+    badge.className = 'signal-badge offline';
+    text.textContent = 'OFFLINE';
+    banner.classList.add('show');
+  }
+}
+
+window.addEventListener('online', () => updateSignal(true));
+window.addEventListener('offline', () => updateSignal(false));
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.getElementById('initTime').textContent = getTime();
+updateSignal(navigator.onLine);
+// Pré-carrega vozes PT-BR
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+// Verifica login
+checkLogin();
+// Mensagem de boas-vindas falada (só se já tem chave)
+if (API_KEY) setTimeout(() => speak('AXIS online. Qual equipamento e qual sintoma?'), 800);
+</script>
+</body>
+</html>
